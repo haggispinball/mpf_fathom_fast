@@ -51,6 +51,7 @@ class MultiballLock(ModeDevice):
             self._events[device] = []
 
         self.source_playfield = self.config['source_playfield']
+        self.autoreplace_locked_balls = self.config['autoreplace_locked_balls']
 
         self.machine.events.add_handler("player_turn_starting", self._player_turn_starting)
 
@@ -168,6 +169,7 @@ class MultiballLock(ModeDevice):
     def _unregister_handlers(self):
         # unregister ball_enter handlers
         self.machine.events.remove_handler(self._lock_ball)
+        self.machine.events.remove_handler(self._post_events)
 
     @property
     def is_virtually_full(self):
@@ -233,16 +235,17 @@ class MultiballLock(ModeDevice):
 
         for _ in range(balls_to_lock):
             self.locked_balls += 1
-            # post event for ball capture
-            self._events[device].append({"event": 'multiball_lock_' + self.name + '_locked_ball',
-                                         "total_balls_locked": self.locked_balls})
-            '''event: multiball_lock_(name)_locked_ball
-            desc: The multiball lock device (name) has just locked one additional ball.
 
-            args:
-                total_balls_locked: The current total number of balls this device
-                    has locked.
-            '''
+        # post event for ball capture
+        self._events[device].append({"event": 'multiball_lock_' + self.name + '_locked_ball',
+                                     "total_balls_locked": self.locked_balls})
+        '''event: multiball_lock_(name)_locked_ball
+        desc: The multiball lock device (name) has just locked one additional ball.
+
+        args:
+            total_balls_locked: The current total number of balls this device
+                has locked.
+        '''
 
         if self.config['locked_ball_counting_strategy'] in ("virtual_only", "min_virtual_physical"):
             # only keep ball if any player could use it
@@ -263,14 +266,21 @@ class MultiballLock(ModeDevice):
         if self.is_virtually_full:
             self._events[device].append({'event': 'multiball_lock_' + self.name + '_full',
                                          'balls': self.locked_balls})
-        '''event: multiball_lock_(name)_full
-        desc: The multiball lock device (name) is now full.
-        args:
-            balls: The number of balls currently locked in this device.
-        '''
+            '''event: multiball_lock_(name)_full
+            desc: The multiball lock device (name) is now full.
+            args:
+                balls: The number of balls currently locked in this device.
+            '''
 
         # schedule eject of new balls for all physically locked balls
-        self._request_new_balls(balls_to_lock_physically)
+        else:
+            self._events[device].append({'event': 'multiball_lock_' + self.name + '_not_full',
+                                         'balls': self.locked_balls})
+
+        if self.autoreplace_locked_balls:
+            self._events[device].append({'event': 'multiball_lock' + self.name + '_replacing_ball',
+                                         'balls': self.locked_balls})
+            self._request_new_balls(balls_to_lock_physically)
 
         self.debug_log("Locked %s balls virtually and %s balls physically", balls_to_lock, balls_to_lock_physically)
 
@@ -284,6 +294,8 @@ class MultiballLock(ModeDevice):
         del kwargs
         for event in self._events[device]:
             self.machine.events.post(**event)
+        self._events[device] = []
+
 
     def _request_new_balls(self, balls):
         """Request new ball to playfield."""

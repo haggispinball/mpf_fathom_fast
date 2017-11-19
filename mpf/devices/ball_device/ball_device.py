@@ -474,7 +474,7 @@ class BallDevice(SystemWideDevice):
 
                 for dummy_iterator in range(unclaimed_balls):
                     self._setup_or_queue_eject_to_target(trough)
-            else:
+            elif self.config['auto_fire_on_unexpected_ball']:
                 target = self._target_on_unexpected_ball
 
                 # try to eject to configured target
