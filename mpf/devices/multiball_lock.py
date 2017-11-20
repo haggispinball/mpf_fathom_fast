@@ -235,17 +235,16 @@ class MultiballLock(ModeDevice):
 
         for _ in range(balls_to_lock):
             self.locked_balls += 1
+            # post event for ball capture
+            self._events[device].append({"event": 'multiball_lock_' + self.name + '_locked_ball',
+                                         "total_balls_locked": self.locked_balls})
+            '''event: multiball_lock_(name)_locked_ball
+            desc: The multiball lock device (name) has just locked one additional ball.
 
-        # post event for ball capture
-        self._events[device].append({"event": 'multiball_lock_' + self.name + '_locked_ball',
-                                     "total_balls_locked": self.locked_balls})
-        '''event: multiball_lock_(name)_locked_ball
-        desc: The multiball lock device (name) has just locked one additional ball.
-
-        args:
-            total_balls_locked: The current total number of balls this device
-                has locked.
-        '''
+            args:
+                total_balls_locked: The current total number of balls this device
+                    has locked.
+            '''
 
         if self.config['locked_ball_counting_strategy'] in ("virtual_only", "min_virtual_physical"):
             # only keep ball if any player could use it

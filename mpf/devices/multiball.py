@@ -63,13 +63,8 @@ class Multiball(SystemWideDevice, ModeDevice):
 
         if self.config['ball_count_type'] == "total":
             # policy: total balls
-            # If we've just captured a playfield ball then balls_in_play is 1 but we want to replace it
-            current_balls = self.machine.game.balls_in_play
-            if self.source_playfield.balls == 0 and self.machine.game.balls_in_play == 1:
-                self.debug_log("Last playfield ball has been captured, adjusting balls_in_play to zero")
-                current_balls = 0
-            if ball_count > current_balls:
-                self.balls_added_live = ball_count - current_balls
+            if ball_count > self.machine.game.balls_in_play:
+                self.balls_added_live = ball_count - self.machine.game.balls_in_play
                 self.machine.game.balls_in_play = ball_count
             self.balls_live_target = ball_count
         else:
