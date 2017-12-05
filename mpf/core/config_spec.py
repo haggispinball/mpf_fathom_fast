@@ -988,6 +988,7 @@ shot_profiles:
     states:
         show: single|str|None
         name: single|str|
+        action: single|enum(play,stop,pause,resume,advance,step_back,update)|play
         priority: single|int|0
         speed: single|float|1
         start_step: single|int|1
