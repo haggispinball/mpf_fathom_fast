@@ -123,7 +123,7 @@ class DeviceManager(MpfController):
         for device_type in self.machine.config['mpf']['device_modules']:
             device_cls = Util.string_to_class(device_type)
             collection_name, _ = device_cls.get_config_info()
-            for device in getattr(self.machine, collection_name):
+            for device in getattr(self.machine, collection_name, []):
                 if hasattr(device, "stop_device"):
                     device.stop_device()
 

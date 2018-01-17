@@ -65,6 +65,11 @@ achievements:
 
 animations:
     __valid_in__: machine, mode                 # todo add to validator
+arduino:
+    __valid_in__: machine
+    ports: list|str|
+    baud: single|int|921600
+    debug: single|bool|False
 assets:
     __valid_in__: machine, mode
     common:

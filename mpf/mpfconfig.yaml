@@ -92,6 +92,7 @@ mpf:
         mpf.plugins.switch_player.SwitchPlayer
 
     platforms:
+        arduino: mpf.platforms.arduino.ArduinoHardwarePlatform
         fadecandy: mpf.platforms.fadecandy.FadecandyHardwarePlatform
         fast: mpf.platforms.fast.fast.FastHardwarePlatform
         i2c_servo_controller: mpf.platforms.i2c_servo_controller.I2CServoControllerHardwarePlatform
@@ -243,6 +244,9 @@ fadecandy:
     linear_cutoff: 0.0
     keyframe_interpolation: True
     dithering: True
+
+arduino:
+  baud: 9600
 
 modes:
     - attract

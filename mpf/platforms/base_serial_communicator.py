@@ -83,7 +83,7 @@ class BaseSerialCommunicator(object):
     @asyncio.coroutine
     def _identify_connection(self):
         """Initialise and identify connection."""
-        raise NotImplementedError("Implement!")
+        raise NotImplementedError("Implement BaseSerialCommunicator._identify_connection!")
 
     def stop(self):
         """Stop and shut down this serial connection."""
@@ -108,7 +108,7 @@ class BaseSerialCommunicator(object):
         Args:
             msg: Bytes of the message (part) received.
         """
-        raise NotImplementedError("Implement!")
+        raise NotImplementedError("Implement BaseSerialCommunicator._parse_msg!")
 
     @asyncio.coroutine
     def _socket_reader(self):
