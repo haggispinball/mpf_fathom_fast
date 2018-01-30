@@ -65,7 +65,6 @@ class Playfield(SystemWideDevice):
                         event='balldevice_' + device.name +
                         '_ejecting_ball',
                         handler=self._source_device_ejecting_ball)
-                    break
 
         # Watch for balls removed from the playfield
         self.machine.events.add_handler('balldevice_captured_from_' + self.name,

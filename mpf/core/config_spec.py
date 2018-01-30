@@ -787,6 +787,7 @@ multiball_locks:
     enable_events: dict|str:ms|None
     disable_events: dict|str:ms|None
     locked_ball_counting_strategy: single|enum(virtual_only,min_virtual_physical,physical_only,no_virtual)|virtual_only
+    eject_on_full: single|bool|false
     reset_all_counts_events: dict|str:ms|None
     reset_count_for_current_player_events: dict|str:ms|None
 mypinballs:
