@@ -1120,6 +1120,7 @@ show_pools:
 show_step:
     __valid_in__: None
     time: single|str|
+    duration_function: single|template_float|None
     __allow_others__:
 shows:
     __valid_in__: machine, mode                      # todo add to validator

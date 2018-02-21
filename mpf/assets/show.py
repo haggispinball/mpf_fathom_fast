@@ -154,6 +154,9 @@ class Show(Asset):
 
             # Calculate the time since previous step
             actions['duration'] = duration
+            # Build a template function to dynamically calculate durations
+            if step.get('duration_function'):
+                actions['duration_function'] = self.machine.placeholder_manager.build_float_template(step.get("duration_function"))
 
             if duration > 0 and total_step_time >= 0:
                 total_step_time += duration
@@ -193,7 +196,7 @@ class Show(Asset):
             if key in self.machine.show_controller.show_players.keys():
                 actions[key] = self.machine.show_controller.show_players[key].validate_config_entry(value, self.name)
 
-            elif key != 'duration' and key != 'time':   # pragma: no cover
+            elif key not in ('duration', 'time', 'duration_function'):   # pragma: no cover
                 self._show_validation_error('Invalid section "{}:" found in show {}'.format(key, self.name))
 
     def _do_unload(self):
@@ -670,7 +673,7 @@ class RunningShow(object):
         for item_type, item_dict in (
                 iter(self.show_steps[self.current_step_index].items())):
 
-            if item_type == 'duration':
+            if item_type in ('duration', 'duration_function'):
                 continue
 
             elif item_type in self.machine.show_controller.show_players:
@@ -690,8 +693,13 @@ class RunningShow(object):
                 raise ValueError("Invalid entry in show: {}".format(item_type))
 
         self.next_step_index += 1
+        next_step = self.show_steps[self.current_step_index]
 
-        time_to_next_step = self.show_steps[self.current_step_index]['duration'] / self.speed
+        if next_step.get('duration_function'):
+            time_to_next_step = next_step['duration_function'].evaluate({ "duration": next_step['duration'], "speed": self.speed })
+        else:
+            time_to_next_step = next_step['duration'] / self.speed
+
         if not self.manual_advance and time_to_next_step > 0:
             self.next_step_time += time_to_next_step
             self._delay_handler = self.machine.clock.schedule_once(self._run_next_step,

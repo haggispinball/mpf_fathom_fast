@@ -354,6 +354,35 @@ class TestShows(MpfTestCase):
         self.assertEqual(3, show.show_steps[4]['duration'])
         self.assertEqual(3, show.show_steps[5]['duration'])
 
+    def test_fixed_duration_shows(self):
+        show = self.machine.shows['show_with_fixed_duration'].play(start_time=0.0, speed=1.0)
+        self.assertEqual(3, len(show.show_steps))
+        self.assertEqual(0, show.current_step_index)
+        show.next_step_time = 0
+        show.advance()
+        self.assertEqual(1, show.current_step_index)
+        self.assertEqual(2.0, show.next_step_time)
+        show.advance()
+        self.assertEqual(2, show.current_step_index)
+        self.assertEqual(4.0, show.next_step_time)
+        show.advance()
+        self.assertEqual(0, show.current_step_index)
+        self.assertEqual(6.0, show.next_step_time)
+
+        show = self.machine.shows['show_with_fixed_duration'].play(start_time=0.0, speed=2.0)
+        self.assertEqual(3, len(show.show_steps))
+        self.assertEqual(0, show.current_step_index)
+        show.next_step_time = 0
+        show.advance()
+        self.assertEqual(1, show.current_step_index)
+        self.assertEqual(1.0, show.next_step_time)
+        show.advance()
+        self.assertEqual(2, show.current_step_index)
+        self.assertEqual(3.0, show.next_step_time)
+        show.advance()
+        self.assertEqual(0, show.current_step_index)
+        self.assertEqual(4.0, show.next_step_time)
+
     def test_tokens_in_shows(self):
         self.assertIn('leds_name_token', self.machine.shows)
         self.assertIn('leds_color_token', self.machine.shows)

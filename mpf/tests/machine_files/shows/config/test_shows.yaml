@@ -92,6 +92,12 @@ shows:
         led_02: red
     - time: 10s
       duration: 3s
+  show_with_fixed_duration:
+    - time: 0
+    - time: '+2s'
+    - time: '+2s'
+      duration_function: duration
+    - time: '+2s'
   leds_color_token_and_fade:
     - time: 0
       lights:
