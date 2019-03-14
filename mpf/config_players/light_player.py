@@ -99,6 +99,12 @@ class LightPlayer(DeviceConfigPlayer):
         if color == "stop":
             self._light_remove(light, instance_dict, full_context, fade_ms)
             return
+        if color[0] == "$":
+            try:
+                color = str(self.machine.config['text_strings'][color[1:]])
+            except KeyError:
+                self.machine.log.warn("Unable to find text string for color '{}'".format(color))
+                color = "on"
         if color != "on":
             # hack to keep compatibility for matrix_light values
             if len(color) == 1:
