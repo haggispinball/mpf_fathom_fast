@@ -812,6 +812,7 @@ mode:
     __valid_in__: mode
     __type__: config
     priority: single|int|100
+    load_priority: single|int|None
     start_events: event_handler|str:ms|None
     stop_events: event_handler|str:ms|None
     events_when_stopped: event_list|str|None

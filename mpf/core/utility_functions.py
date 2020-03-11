@@ -146,6 +146,9 @@ class Util:
                 # Split at commas
                 new_list = string.split(',')
 
+            if new_list[-1] == '':
+                raise ValueError("Comma-separated list found a trailing comma: {}".format(string))
+
             # strip and replace "none" with None
             return [x.strip() if x != "none" else None for x in new_list]
 
