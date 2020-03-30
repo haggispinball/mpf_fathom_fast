@@ -177,19 +177,6 @@ ball_holds:
     release_one_events: event_handler|str:ms|None
     release_all_events: event_handler|str:ms|None
     release_one_if_full_events: event_handler|str:ms|None
-ball_locks:
-    __valid_in__: machine, mode
-    __type__: device
-    balls_to_lock: single|int|
-    lock_devices: list|machine(ball_devices)|
-    source_playfield: single|machine(ball_devices)|playfield
-    request_new_balls_to_pf: single|bool|True
-    enable_events: event_handler|str:ms|None
-    disable_events: event_handler|str:ms|None
-    reset_events: event_handler|str:ms|machine_reset_phase_3, ball_starting, ball_will_end, service_mode_entered
-    release_one_events: event_handler|str:ms|None
-    release_all_balls_events: event_handler|str:ms|None
-    release_one_if_full_events: event_handler|str:ms|None
 ball_routings:
     __valid_in__: mode
     __type__: device
@@ -217,16 +204,18 @@ bcp:
     __valid_in__: machine
     __type__: config
     debug: single|bool|False
-    connections:
-        host: single|str|None
-        port: single|int|5050
-        type: single|str|
-        required: single|bool|True
-        exit_on_close: single|bool|True
-    servers:
-        ip: single|str|None
-        port: single|int|5050
-        type: single|str|
+    connections: list|subconfig(bcp_connection)|None
+    servers: list|subconfig(bcp_server)|None
+bcp_connection:
+    host: single|str|None
+    port: single|int|5050
+    type: single|str|
+    required: single|bool|True
+    exit_on_close: single|bool|True
+bcp_server:
+    ip: single|str|None
+    port: single|int|5050
+    type: single|str|
 bitmap_fonts:
     __valid_in__: machine, mode
     __type__: config_dict
@@ -242,7 +231,7 @@ bonus_mode_settings:
     hurry_up_delay_ms: single|ms|500
     hurry_up_event: single|str|flipper_cancel
     end_bonus_event: single|str|None
-    keep_multiplier: single|bool|False
+    keep_multiplier: single|template_bool|False
     bonus_entries: list|subconfig(bonus_entries)|
 bonus_entries:
     event: single|str|
@@ -352,7 +341,7 @@ credits_pricing_tiers:
     credits: single|template_int|1
 device:     # base for all devices
     label: single|str|%
-    tags: event_list|str|None
+    tags: list|str|None
     debug: single|bool|False
     console_log: single|enum(none,basic,full)|basic
     file_log: single|enum(none,basic,full)|basic
@@ -362,7 +351,6 @@ displays:
     width: single|int|800
     height: single|int|600
     default: single|bool|False
-    fps: single|int|0
     round_anchor_x: single|str|center
     round_anchor_y: single|str|middle
 display_light_player:
@@ -604,19 +592,19 @@ game:
 hardware:
     __valid_in__: machine
     __type__: config
-    platform: event_list|str|virtual
-    coils: event_list|str|default
-    segment_displays: event_list|str|default
-    switches: event_list|str|default
-    lights: event_list|str|default
-    dmd: event_list|str|default
-    rgb_dmd: event_list|str|default
+    platform: list|str|virtual
+    coils: list|str|default
+    segment_displays: list|str|default
+    switches: list|str|default
+    lights: list|str|default
+    dmd: list|str|default
+    rgb_dmd: list|str|default
     driverboards: single|str|None
-    servo_controllers: event_list|str|default
-    accelerometers: event_list|str|default
-    i2c: event_list|str|default
-    stepper_controllers: event_list|str|default
-    hardware_sound_system: event_list|str|default
+    servo_controllers: list|str|default
+    accelerometers: list|str|default
+    i2c: list|str|default
+    stepper_controllers: list|str|default
+    hardware_sound_system: list|str|default
 hardware_sound_systems:
     __valid_in__: machine
     __type__: device
@@ -636,7 +624,7 @@ high_score:
     categories: omap|str:list|
     defaults: dict|str:list|None
     enter_initials_timeout: single|secs|20s
-    reverse_sort: event_list|str|None
+    reverse_sort: list|str|None
 info_lights:
     __valid_in__: machine                            # todo add to validator
     __type__: config
@@ -1323,7 +1311,7 @@ state_machines:
     persist_state: single|bool|False
     starting_state: single|str|start
 state_machine_transitions:
-    source: event_list|str|
+    source: list|str|
     target: single|str|
     events: event_list|str|
     events_when_transitioning: event_list|str|None
@@ -1368,6 +1356,8 @@ show_player:
 show_pools:
     __valid_in__: machine, mode                      # todo add to validator
     __type__: config_dict
+    shows: list|machine(shows)|
+    type: single|enum(random,sequence,random_force_next,random_force_all)|sequence
 show_step:
     time: single|str|
     __allow_others__:
@@ -1724,7 +1714,6 @@ timed_switches:
 timers:
     __valid_in__: mode
     __type__: device
-    debug: single|bool|False
     start_value: single|template_int|0
     end_value: single|template_int|None
     direction: single|enum(up,down)|up
@@ -1734,8 +1723,6 @@ timers:
     control_events: list|subconfig(timer_control_events)|None
     restart_on_complete: single|bool|False
     bcp: single|bool|False
-    console_log: single|enum(none,basic,full)|none
-    file_log: single|enum(none,basic,full)|basic
 timer_control_events:  # subconfig for mode timers
     action: single|enum(add,subtract,jump,start,stop,reset,restart,pause,set_tick_interval,change_tick_interval,reset_tick_interval)|
     event: single|str|

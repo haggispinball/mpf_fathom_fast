@@ -155,6 +155,8 @@ class TestP3Roc(MpfTestCase):
 
         super().setUp()
 
+        p_roc_common.pinproc.normalize_machine_type.assert_called_once_with("pdb")
+
     def test_platform(self):
         self._test_accelerometer()
         self._test_pulse()
@@ -168,6 +170,7 @@ class TestP3Roc(MpfTestCase):
         self._test_hw_rule_hold_allow_enable()
         self._test_hw_rule_multiple_pulse()
         self._test_servo_via_i2c()
+        self._test_pd_led_servo()
         self._test_initial_switches()
         self._test_switches()
         self._test_flipper_single_coil()
@@ -517,6 +520,26 @@ SW-16 boards found:
             call(7, 0x8014, 88),
             call(7, 0x8015, 2)
         ])
+
+    def _test_pd_led_servo(self):
+        self.pinproc.write_data = MagicMock(return_value=True)
+        self.machine.servos["servo_pd_led_0"].go_to_position(0)
+        self.wait_for_platform()
+        self.pinproc.write_data.assert_has_calls([
+            call(3, 3072, 0x01000000 | (2 & 0x3F) << 16 | 72),              # low byte of address (72)
+            call(3, 3072, 0x01000000 | (2 & 0x3F) << 16 | (6 << 8)),        # high byte of address (0)
+            call(3, 3072, 0x01000000 | (2 & 0x3F) << 16 | (1 << 8) | 127),  # set servo position
+            ], False)
+
+        self.pinproc.write_data = MagicMock(return_value=True)
+        self.machine.servos["servo_pd_led_0"].go_to_position(1)
+        self.wait_for_platform()
+
+        self.pinproc.write_data.assert_has_calls([
+            call(3, 3072, 0x01000000 | (2 & 0x3F) << 16 | 72),              # low byte of address (72)
+            call(3, 3072, 0x01000000 | (2 & 0x3F) << 16 | (6 << 8)),        # high byte of address (0)
+            call(3, 3072, 0x01000000 | (2 & 0x3F) << 16 | (1 << 8) | 255),  # set servo position
+            ], False)
 
     def _test_initial_switches(self):
         self.assertFalse(self.machine.switch_controller.is_active("s_test"))

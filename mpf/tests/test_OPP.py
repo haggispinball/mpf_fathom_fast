@@ -163,7 +163,7 @@ Incand cards:
 
 Input cards:
  - CPU: com1 Board: 0x20 Card: 0 Numbers: [0, 1, 2, 3, 8, 9, 10, 11, 12, 13, 14, 15]
- - CPU: com1 Board: 0x21 Card: 1 Numbers: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]
+ - CPU: com1 Board: 0x21 Card: 1 Numbers: [0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]
  - CPU: com1 Board: 0x23 Card: 3 Numbers: [0, 1, 2, 3, 8, 9, 10, 11]
  - CPU: com1 Board: 0x23 Card: 3 Numbers: [32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95]
 
@@ -342,6 +342,7 @@ class TestOPP(OPPCommon, MpfTestCase):
         self._test_flippers()
 
         # test hardware scan
+        self.maxDiff = 100000
         info_str = """Connected CPUs:
  - Port: com1 at 115200 baud
  -> Board: 0x20 Firmware: 0x10100
@@ -352,7 +353,7 @@ Incand cards:
 
 Input cards:
  - CPU: com1 Board: 0x20 Card: 0 Numbers: [0, 1, 2, 3, 8, 9, 10, 11, 12, 13, 14, 15]
- - CPU: com1 Board: 0x21 Card: 1 Numbers: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]
+ - CPU: com1 Board: 0x21 Card: 1 Numbers: [0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27]
 
 Solenoid cards:
  - CPU: com1 Board: 0x20 Card: 0 Numbers: [0, 1, 2, 3]
@@ -449,24 +450,28 @@ LEDs:
         self.assertFalse(self.serialMock.expected_commands)
 
     def _test_leds(self):
-        # add ff/ff/ff as color 0
-        self.serialMock.expected_commands[self._crc_message(b'\x21\x11\x00\xff\xff\xff', False)] = False
-        # set led 0 to color 0
-        self.serialMock.expected_commands[self._crc_message(b'\x21\x16\x00\x80', False)] = False
+        # set leds 0, 1, 2 to brightness 255
+        self.serialMock.expected_commands[self._crc_message(b'\x21\x40\x00\x00\x00\x03\x00\x00\xff\xff\xff', False)] = False
 
         self.machine.lights["test_led1"].on()
         self._wait_for_processing()
         self.assertFalse(self.serialMock.expected_commands)
 
-        # add 00/00/00 as color 1
-        self.serialMock.expected_commands[self._crc_message(b'\x21\x11\x01\x00\x00\x00', False)] = False
-        # set led 0 to color 1
-        self.serialMock.expected_commands[self._crc_message(b'\x21\x16\x00\x81', False)] = False
-        # set led 1 to color 10
-        self.serialMock.expected_commands[self._crc_message(b'\x21\x16\x01\x80', False)] = False
+        # set leds 0, 1, 2 to brightness 0
+        # set leds 3, 4, 5 to brightness 255
+        self.serialMock.expected_commands[self._crc_message(b'\x21\x40\x00\x00\x00\x06\x00\x00\x00\x00\x00\xff\xff\xff', False)] = False
 
         self.machine.lights["test_led1"].off()
         self.machine.lights["test_led2"].on()
+
+        self._wait_for_processing()
+
+        self.assertFalse(self.serialMock.expected_commands)
+
+        # fade leds 3, 4, 5 to brightness 245, 222, 179
+        self.serialMock.expected_commands[self._crc_message(b'\x21\x40\x00\x03\x00\x03\x07\xcf\xf5\xde\xb3', False)] = False
+
+        self.machine.lights["test_led2"].color("wheat", fade_ms=2000)
 
         self._wait_for_processing()
 
