@@ -1,6 +1,6 @@
 """Light config player."""
 from mpf.config_players.device_config_player import DeviceConfigPlayer
-from mpf.core.rgb_color import RGBColor
+from mpf.core.rgb_color import RGBColor, ColorException
 from mpf.core.utility_functions import Util
 
 
@@ -38,7 +38,10 @@ class LightPlayer(DeviceConfigPlayer):
                     self._light_named_color(light_name, instance_dict, full_context, s['color'], s["fade"],
                                             final_priority, start_time)
             else:
-                self._light_color(light, instance_dict, full_context, s['color'], s["fade"], final_priority, start_time)
+                try:
+                    self._light_color(light, instance_dict, full_context, s['color'], s["fade"], final_priority, start_time)
+                except ColorException as e:
+                    raise ColorException("Unable to create color for light {}".format(light)) from e
 
     def _remove(self, settings, context, key=""):
         instance_dict = self._get_instance_dict(context)

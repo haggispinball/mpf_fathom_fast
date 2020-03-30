@@ -713,13 +713,18 @@ class RunningShow:
             except KeyError:
                 raise ValueError("Invalid entry in show: {}".format(item_type))
 
-            player.show_play_callback(
-                settings=item_dict,
-                context=self.context,
-                calling_context=self.current_step_index,
-                priority=self.show_config.priority,
-                show_tokens=self.show_config.show_tokens,
-                start_time=self.next_step_time)
+            try:
+                player.show_play_callback(
+                    settings=item_dict,
+                    context=self.context,
+                    calling_context=self.current_step_index,
+                    priority=self.show_config.priority,
+                    show_tokens=self.show_config.show_tokens,
+                    start_time=self.next_step_time)
+            except Exception as e:
+                raise type(e)("Unable to play show {} with settings {} and tokens {}".format(self.name, 
+                                                                                             item_dict, 
+                                                                                             self.show_config.show_tokens))
 
             self._players.add(item_type)
 
