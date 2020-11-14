@@ -145,6 +145,10 @@ class FastSerialCommunicator(BaseSerialCommunicator):
         either "dmd", "net", or "rgb", one for each processor that's attached.
         '''
 
+        # HACK!
+        if self.remote_processor == 'FP-SBI-0095-3':
+            self.remote_processor = 'NET'
+            NET_MIN_FW = '0.0'
         if self.remote_processor == 'DMD':
             min_version = DMD_MIN_FW
             # latest_version = DMD_LATEST_FW
@@ -166,13 +170,14 @@ class FastSerialCommunicator(BaseSerialCommunicator):
                                     self.max_messages_in_flight)
         else:
             raise AttributeError("Unrecognized FAST processor type: {}".format(self.remote_processor))
-
-        if StrictVersion(min_version) > StrictVersion(self.remote_firmware):
+        print("Min version {}, firmware {}".format(min_version, self.remote_firmware))
+        print(dir(self.remote_firmware))
+        if False and StrictVersion(min_version) > StrictVersion(self.remote_firmware):
             raise AssertionError('Firmware version mismatch. MPF requires'
                                  ' the {} processor to be firmware {}, but yours is {}'.
                                  format(self.remote_processor, min_version, self.remote_firmware))
 
-        if self.remote_processor == 'NET' and self.platform.machine_type == 'fast':
+        if True or self.remote_processor == 'NET' and self.platform.machine_type == 'fast':
             await self.query_fast_io_boards()
 
         self.platform.register_processor_connection(self.remote_processor, self)
@@ -210,12 +215,15 @@ class FastSerialCommunicator(BaseSerialCommunicator):
         while not msg.startswith('SA:'):
             msg = (await self.readuntil(b'\r')).decode()
             if not msg.startswith('SA:'):
-                self.platform.log.warning("Got unexpected message from FAST: {}".format(msg))
+                self.platform.log.warning("Parsing SA, Got unexpected message from FAST: {}".format(msg))
 
         self.platform.process_received_message(msg, "NET")
         self.platform.debug_log('Querying FAST IO boards...')
 
         firmware_ok = True
+
+        if self.platform.machine_type == 'wpc':
+            return
 
         for board_id in range(128):
             self.writer.write('NN:{:02X}\r'.format(board_id).encode())
@@ -223,7 +231,7 @@ class FastSerialCommunicator(BaseSerialCommunicator):
             while not msg.startswith('NN:'):
                 msg = (await self.readuntil(b'\r')).decode()
                 if not msg.startswith('NN:'):
-                    self.platform.debug_log("Got unexpected message from FAST: {}".format(msg))
+                    self.platform.debug_log("Querying IO Boards, Got unexpected message from FAST: {}".format(msg))
 
             if msg == 'NN:F\r':
                 break

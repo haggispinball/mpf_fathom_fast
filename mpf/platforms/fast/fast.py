@@ -290,7 +290,7 @@ class FastHardwarePlatform(ServoPlatform, LightsPlatform, DmdPlatform,
         """
         if name == 'DMD':
             self.dmd_connection = communicator
-        elif name == 'NET':
+        elif name == 'NET' or name == 'FP-SBI-0095-3':
             self.net_connection = communicator
         elif name == 'RGB':
             self.rgb_connection = communicator
@@ -376,11 +376,16 @@ class FastHardwarePlatform(ServoPlatform, LightsPlatform, DmdPlatform,
         """
         assert remote_processor == "NET"
         self.debug_log("Received SA: %s", msg)
-
+        print("SA: {}".format(msg))
         hw_states = dict()
 
-        _, local_states, _, nw_states = msg.split(',')
+        try:
+            _, local_states, _, nw_states = msg.split(',')
+        except ValueError:
+            _, local_states = msg.split(',')
+            nw_states = ''
 
+        print("Checknig network states...")
         for offset, byte in enumerate(bytearray.fromhex(nw_states)):
             for i in range(8):
                 num = Util.int_to_hex_string((offset * 8) + i)
