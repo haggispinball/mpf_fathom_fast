@@ -621,7 +621,7 @@ class FastHardwarePlatform(ServoPlatform, LightsPlatform, DmdPlatform,
         # (switch number, connection)
         number_tuple = (number, platform_config['connection'])
 
-        self.debug_log("FAST Switch hardware tuple: %s", number)
+        self.debug_log("FAST Switch hardware tuple: %s", number_tuple)
 
         switch = FASTSwitch(config=config, number_tuple=number_tuple,
                             platform=self, platform_settings=platform_config)

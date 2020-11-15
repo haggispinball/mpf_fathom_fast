@@ -223,6 +223,21 @@ class FastSerialCommunicator(BaseSerialCommunicator):
         firmware_ok = True
 
         if self.platform.machine_type == 'wpc':
+            # Register a mega-board, FAKE VALUES right now
+            node_id = "0"
+            model = "FAST-LEGACY"
+            fw = "0.14"
+            dr = "64"
+            sw = "128"
+            self.platform.register_io_board(FastIoBoard(int(node_id,16), model, fw, int(sw, 16), int(dr, 16)))
+
+            self.platform.debug_log('Fast IO Board {0}: Model: {1}, '
+                                    'Firmware: {2}, Switches: {3}, '
+                                    'Drivers: {4}'.format(node_id,
+                                                          model, fw,
+                                                          int(sw, 16),
+                                                          int(dr, 16)))
+
             return
 
         for board_id in range(128):
