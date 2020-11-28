@@ -1,4 +1,14 @@
 """Defines for FAST WPC."""
+
+RETRO_CONFIGS = {
+    'WPC89': {
+        # Setting    HEX     DEC
+        "node_id":  '00',   # 0
+        "drivers":  '40',   # 64
+        "switches": '80',   # 128
+    }
+}
+
 WPC_SWITCH_MAP = {
 
     # WPC   HEX    DEC

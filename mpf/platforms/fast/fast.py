@@ -20,7 +20,7 @@ from mpf.platforms.fast.fast_led import FASTDirectLED, FASTDirectLEDChannel
 from mpf.platforms.fast.fast_light import FASTMatrixLight
 from mpf.platforms.fast.fast_serial_communicator import FastSerialCommunicator
 from mpf.platforms.fast.fast_switch import FASTSwitch
-
+from mpf.platforms.autodetect import autodetect_fast_ports
 from mpf.core.platform import ServoPlatform, DmdPlatform, SwitchPlatform, DriverPlatform, LightsPlatform, \
     DriverSettings, SwitchSettings, DriverConfig, SwitchConfig, RepulseSettings
 from mpf.core.utility_functions import Util
@@ -55,7 +55,7 @@ class FastHardwarePlatform(ServoPlatform, LightsPlatform, DmdPlatform,
         else:
             self.machine_type = self.machine.config['hardware']['driverboards'].lower()
 
-        if self.machine_type == 'wpc':
+        if self.machine_type == 'wpc' or self.machine_type == 'retro':
             self.debug_log("Configuring the FAST Controller for WPC driver "
                            "board")
         else:
@@ -246,25 +246,8 @@ class FastHardwarePlatform(ServoPlatform, LightsPlatform, DmdPlatform,
         """
         ports = None
         if self.config['ports'][0] == "autodetect":
-            devices = [port.device for port in serial.tools.list_ports.comports()]
-            # Look for four devices with sequential tails of 0-3 or A-D
-            seqs = (("0", "1", "2", "3"), ("A", "B", "C", "D"))
-            for d in devices:
-                for seq in seqs:
-                    if d[-1] == seq[0]:
-                        root = d[:-1]
-                        if "{}{}".format(root, seq[1]) in devices and \
-                           "{}{}".format(root, seq[2]) in devices and \
-                           "{}{}".format(root, seq[3]) in devices:
-                            ports = ("{}{}".format(root, seq[1]), "{}{}".format(root, seq[2]))
-                            self.debug_log("Autodetect found ports! {}".format(ports))
-                            break
-                # If ports were found, skip the rest of the devices
-                if ports:
-                    break
-            if not ports:
-                raise RuntimeError("Unable to auto-detect FAST hardware from available devices: {}".format(
-                                   ", ".join(devices)))
+            ports = autodetect_fast_ports(self.machine_type)
+            self.debug_log("Autodetect for machine type %s found ports! %s", self.machine_type, ports)
         else:
             ports = self.config['ports']
 
@@ -466,7 +449,7 @@ class FastHardwarePlatform(ServoPlatform, LightsPlatform, DmdPlatform,
             raise AssertionError("Driver needs a number")
 
         # If we have WPC driver boards, look up the driver number
-        if self.machine_type == 'wpc':
+        if self.machine_type == 'wpc' or self.machine_type == 'retro':
             try:
                 number = fast_defines.WPC_DRIVER_MAP[number.upper()]
             except KeyError:
@@ -593,7 +576,7 @@ class FastHardwarePlatform(ServoPlatform, LightsPlatform, DmdPlatform,
                                  "switch, but no connection to a NET processor"
                                  "is available")
 
-        if self.machine_type == 'wpc':  # translate switch num to FAST switch
+        if self.machine_type == 'wpc' or self.machine_type == 'retro':  # translate switch num to FAST switch
             try:
                 number = fast_defines.WPC_SWITCH_MAP[str(number).upper()]
             except KeyError:
@@ -661,7 +644,7 @@ class FastHardwarePlatform(ServoPlatform, LightsPlatform, DmdPlatform,
     def parse_light_number_to_channels(self, number: str, subtype: str):
         """Parse light channels from number string."""
         if subtype == "gi":
-            if self.machine_type == 'wpc':  # translate number to FAST GI number
+            if self.machine_type == 'wpc' or self.machine_type == 'retro':  # translate number to FAST GI number
                 try:
                     number = fast_defines.WPC_GI_MAP[str(number).upper()]
                 except KeyError:
@@ -675,7 +658,7 @@ class FastHardwarePlatform(ServoPlatform, LightsPlatform, DmdPlatform,
                 }
             ]
         if subtype == "matrix":
-            if self.machine_type == 'wpc':  # translate number to FAST light num
+            if self.machine_type == 'wpc' or self.machine_type == 'retro':  # translate number to FAST light num
                 try:
                     number = fast_defines.WPC_LIGHT_MAP[str(number).upper()]
                 except KeyError:
