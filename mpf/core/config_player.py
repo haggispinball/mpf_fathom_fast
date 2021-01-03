@@ -59,7 +59,7 @@ class ConfigPlayer(LogMixin, metaclass=abc.ABCMeta):
             self.process_mode_config, self.config_file_section)
 
         self.machine.mode_controller.register_start_method(
-            self.mode_start, self.config_file_section)
+            self.mode_started, self.config_file_section)
 
         # Look through the machine config for config_player sections and
         # for shows to validate and process
@@ -198,15 +198,15 @@ class ConfigPlayer(LogMixin, metaclass=abc.ABCMeta):
         return self.machine.config_validator.validate_config(
             self.config_file_section, value, base_spec='config_player_common')
 
-    def mode_start(self, config, priority, mode):
+    def mode_started(self, config, priority, mode):
         """Add events for mode."""
         event_keys = self.register_player_events(config, mode, priority)
 
         self.mode_event_keys[mode] = event_keys
 
-        return self.mode_stop, mode
+        return self.mode_will_stop, mode
 
-    def mode_stop(self, mode):
+    def mode_will_stop(self, mode):
         """Remove events for mode."""
         self.unload_player_events(self.mode_event_keys.pop(mode, list()))
         self.clear_context(mode.name)

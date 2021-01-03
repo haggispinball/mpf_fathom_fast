@@ -43,7 +43,7 @@ class Tilt(Mode):
             source=self.config.get('tilt', {}),
             section_name='tilt')
 
-    def mode_start(self, **kwargs):
+    def mode_started(self, **kwargs):
         """Start mode."""
         self._register_switch_handlers()
 
@@ -63,7 +63,7 @@ class Tilt(Mode):
         self._warnings_to_tilt = self.tilt_config['warnings_to_tilt'].evaluate([])
         self._multiple_hit_window = self.tilt_config['multiple_hit_window'].evaluate([])
 
-    def mode_stop(self, **kwargs):
+    def mode_will_stop(self, **kwargs):
         """Stop mode."""
         self._remove_switch_handlers()
 

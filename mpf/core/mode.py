@@ -141,7 +141,7 @@ class Mode(LogMixin):
         Warning: You can safely call this method, but do not override it in your
         mode code. If you want to write your own mode code by subclassing Mode,
         put whatever code you want to run when this mode starts in the
-        mode_start method which will be called automatically.
+        mode_will_start or mode_started methods which will be called automatically.
         """
         # remove argument so we do not repost this
         kwargs.pop('_from_bcp', None)
@@ -257,7 +257,7 @@ class Mode(LogMixin):
     def _mode_started_callback(self, **kwargs) -> None:
         """Handle result of mode_<name>_started queue event."""
         del kwargs
-        self.mode_start(**self.start_event_kwargs)
+        self.mode_started(**self.start_event_kwargs)
 
         self.start_event_kwargs = dict()
 
@@ -278,7 +278,7 @@ class Mode(LogMixin):
         Warning: You can safely call this method, but do not override it in your
         mode code. If you want to write your own mode code by subclassing Mode,
         put whatever code you want to run when this mode stops in the
-        mode_stop method which will be called automatically.
+        mode_will_stop method which will be called automatically.
 
         Returns true if the mode is running. Otherwise false.
         """
@@ -364,11 +364,13 @@ class Mode(LogMixin):
             self._mode_start_wait_queue.clear()
             self._mode_start_wait_queue = None
 
+        self.mode_stopped()
+
     def _mode_stopped_callback(self, **kwargs) -> None:
         del kwargs
 
-        # Call the mode_stop() method before removing the devices
-        self.mode_stop(**self.mode_stop_kwargs)
+        # Call the mode_will_stop() method before removing the devices
+        self.mode_will_stop(**self.mode_stop_kwargs)
         self.mode_stop_kwargs = dict()
 
         # Clean up the mode handlers and devices
@@ -567,8 +569,20 @@ class Mode(LogMixin):
     def mode_will_start(self, **kwargs) -> None:
         """User-overrideable method which will be called whenever this mode starts (i.e. before it becomes active)."""
 
-    def mode_start(self, **kwargs) -> None:
+    def mode_started(self, **kwargs) -> None:
         """User-overrideable method which will be called whenever this mode starts (i.e. whenever it becomes active)."""
 
+    def mode_will_stop(self, **kwargs) -> None:
+        """User-overrideable method which will be called whenever this mode stops (i.e. before it removes itself)."""
+
+    def mode_stopped(self) -> None:
+        """User-overrideable method which will be called whenever this mode stops (i.e. after it removes itself)."""
+
+    def mode_start(self, **kwargs) -> None:
+        self.warning_log("Custom mode method 'mode_start' is deprecated. Please use 'mode_started' instead.")
+        self.mode_started(**kwargs)
+
     def mode_stop(self, **kwargs) -> None:
-        """User-overrideable method which will be called whenever this mode stops."""
+        self.warning_log(
+            "Custom mode method 'mode_stop' is deprecated. Please use 'mode_will_stop' or 'mode_stopped' instead.")
+        self.mode_will_stop(**kwargs)

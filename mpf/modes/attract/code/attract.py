@@ -22,7 +22,7 @@ class Attract(Mode):
         self.start_hold_time = 0.0
         self.start_buttons_held = list()
 
-    def mode_start(self, **kwargs):
+    def mode_started(self, **kwargs):
         """Start the attract mode."""
         # register switch handlers for the start button press so we can
         # capture long presses

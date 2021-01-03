@@ -85,11 +85,15 @@ methods that you can use. They are:
    mode_init
       Called once when MPF is starting up
 
-   mode_start
+   mode_will_start
+      Called every time the mode starts, just *before* the *mode_<name>_started*
+      event is posted.
+
+   mode_started
       Called every time the mode starts, just *after* the *mode_<name>_started*
       event is posted.
 
-   mode_stop
+   mode_will_stop
       Called every time the mode stops, just *before* the *mode_<name>_stopping*
       event is posted.
 
@@ -142,8 +146,8 @@ configs at all if you wanted to.
        def mode_init(self):
            print("My custom mode code is being initialized")
 
-       def mode_start(self, **kwargs):
-           # The mode_start method needs **kwargs because some events that
+       def mode_will_start(self, **kwargs):
+           # The mode_will_start method needs **kwargs because some events that
            # start modes pass additional parameters
 
            print("My custom mode code is starting")
@@ -168,8 +172,8 @@ configs at all if you wanted to.
        def player_score_change(self, **kwargs):
            print("The new player's score is {}".format(self.player.score))
 
-       def mode_stop(self, **kwargs):
-           # The mode_stop method needs **kwargs because some events that
+       def mode_will_stop(self, **kwargs):
+           # The mode_will_stop method needs **kwargs because some events that
            # stop modes pass additional parameters
 
            print("My custom mode code is stopping")

@@ -292,7 +292,7 @@ class Game(AsyncMode):
             self._stopping_queue.clear()
             self._stopping_queue = None
 
-    def mode_stop(self, **kwargs):
+    def mode_will_stop(self, **kwargs):
         """Stop mode."""
         del kwargs
 

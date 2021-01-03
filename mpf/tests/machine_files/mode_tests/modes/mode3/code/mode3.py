@@ -5,8 +5,8 @@ class Mode3(Mode):
     def mode_init(self):
         self.custom_code = True
 
-    def mode_start(self, **kwargs):
+    def mode_started(self, **kwargs):
         pass
 
-    def mode_stop(self, **kwargs):
+    def mode_will_stop(self, **kwargs):
         pass

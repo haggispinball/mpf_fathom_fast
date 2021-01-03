@@ -45,7 +45,7 @@ class Carousel(Mode):
         if not self._all_items:
             raise AssertionError("Specify at least one item to select from")
 
-    def mode_start(self, **kwargs):
+    def mode_started(self, **kwargs):
         """Start mode and let the player select."""
         self._items = []
         for item in self._all_items:
@@ -63,7 +63,7 @@ class Carousel(Mode):
             self.stop()
             return
 
-        super().mode_start(**kwargs)
+        super().mode_started(**kwargs)
         self._done = False
         self._is_blocking = False
 

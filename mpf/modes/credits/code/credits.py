@@ -53,7 +53,7 @@ class Credits(Mode):
                                                        "free_play", self.credits_config['free_play'],
                                                        {True: "Free Play", False: "Credit Play"}))
 
-    def mode_start(self, **kwargs):
+    def mode_started(self, **kwargs):
         """Start mode."""
         self.add_mode_event_handler('enable_free_play',
                                     self.enable_free_play)
@@ -88,7 +88,7 @@ class Credits(Mode):
         self.machine.variables.set_machine_var('credit_units', 0)
         self._update_credit_strings()
 
-    def mode_stop(self, **kwargs):
+    def mode_will_stop(self, **kwargs):
         """Stop mode."""
         self._set_free_play_string()
         self._disable_credit_handlers()

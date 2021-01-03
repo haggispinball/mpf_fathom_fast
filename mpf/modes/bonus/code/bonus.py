@@ -24,7 +24,7 @@ class Bonus(Mode):
         self.bonus_entries = self.settings["bonus_entries"]
         self.bonus_iterator = None
 
-    def mode_start(self, **kwargs):
+    def mode_started(self, **kwargs):
         """Start the bonus mode and setup all handlers."""
         if not self.bonus_entries:
             raise ValueError(
