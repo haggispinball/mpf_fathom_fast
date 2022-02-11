@@ -144,6 +144,7 @@ class MachineController(LogMixin):
 
         # add some type hints
         if MYPY:   # pragma: no cover
+            print("MYPYMYPYPMYPYPYMPY")
             # controllers
             self.events = self.events                               # type: EventManager
             self.switch_controller = self.switch_controller         # type: SwitchController
@@ -371,10 +372,13 @@ class MachineController(LogMixin):
 
     def validate_machine_config_section(self, section: str) -> None:
         """Validate a config section."""
+        self.log.info("Validating machine config section %s", section)
         if section not in self.config_validator.get_config_spec():
+            self.log.info(" - not in spec!")
             return
 
         if section not in self.config:
+            self.log.info(" - empty!")
             self.config[section] = dict()
 
         self.config[section] = self.config_validator.validate_config(

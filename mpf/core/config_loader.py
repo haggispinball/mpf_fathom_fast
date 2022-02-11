@@ -9,6 +9,7 @@ import sys
 from pathlib import PurePath
 
 from mpf.core.config_processor import ConfigProcessor
+from mpf.core.config_validator import ConfigValidator
 from mpf.core.config_spec_loader import ConfigSpecLoader
 
 
@@ -141,6 +142,7 @@ class YamlMultifileConfigLoader(ConfigLoader):
         self.machine_path = machine_path
         self.config_processor = ConfigProcessor(load_cache, store_cache)
         self.log = logging.getLogger("YamlMultifileConfigLoader")
+        self.log.addHandler(logging.StreamHandler())
         try:
             # pylint: disable-msg=import-outside-toplevel
             import mpf.core
@@ -158,10 +160,24 @@ class YamlMultifileConfigLoader(ConfigLoader):
         """Load and return a MPF config."""
         config_spec = self._load_config_spec()
         machine_config = self._load_mpf_machine_config(config_spec)
+
         config_spec = self._load_additional_config_spec(config_spec, machine_config)
         mode_config = self._load_modes(config_spec, machine_config)
         show_config = self._load_shows(config_spec, machine_config, mode_config)
-        return MpfConfig(config_spec, machine_config, mode_config, show_config, self.machine_path, self.mpf_path)
+        mpf_config = MpfConfig(config_spec, machine_config, mode_config, show_config, self.machine_path, self.mpf_path)
+
+
+        config_validator = ConfigValidator(self, mpf_config.get_config_spec())
+        print("Machine config: %s" % machine_config.keys())
+        print(f"Spike is: ---{machine_config['spike']}--")
+        # for section, config in machine_config.items():
+        #     if section not in config_validator.get_config_spec():
+        #         continue
+
+        #     if section not in machine_config:
+        #         machine_config[section] = dict()
+        #     machine_config[section] = config_validator.validate_config(section, config, section)
+        return mpf_config
 
     def load_mc_config(self) -> MpfMcConfig:
         """Load and return a MC config."""
@@ -175,7 +191,8 @@ class YamlMultifileConfigLoader(ConfigLoader):
 
     def _load_mpf_machine_config(self, config_spec):
         config_files = [os.path.join(self.mpf_path, "mpfconfig.yaml")]
-
+        print("Loading mpf machin econfig")
+        self.log.setLevel(1)
         for num, config_file in enumerate(self.configfile):
             config_files.append(os.path.join(self.machine_path, "config", config_file))
 

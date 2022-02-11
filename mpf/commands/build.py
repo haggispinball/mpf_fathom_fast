@@ -2,14 +2,18 @@
 import pickle
 
 import argparse
+import asyncio
+from asyncio import coroutine
+from mpf.core.machine import MachineController
+from mpf.core.settings_controller import SettingsController
 from mpf.core.utility_functions import Util
 
 from mpf.core.config_loader import YamlMultifileConfigLoader, ProductionConfigLoader
 
+from mpf.core.config_validator import ConfigValidator
 from mpf.commands import MpfCommandLineParser
 
 SUBCOMMAND = True
-
 
 class Command(MpfCommandLineParser):
 
@@ -54,12 +58,33 @@ class Command(MpfCommandLineParser):
     def production_bundle(self):
         """Create a production bundle."""
         config_loader = YamlMultifileConfigLoader(self.machine_path, self.args.configfile, False, False)
+        config_loader.log.setLevel(1)
         mpf_config = config_loader.load_mpf_config()
         if self.args.mc:
             mc_config = config_loader.load_mc_config()
 
         if self.args.dest_path:
             mpf_config.set_machine_path(self.args.dest_path)
+
+        machine = MachineController({ "production": False, "force_platform": None, "text_ui": False, "bcp": False }, mpf_config)
+        machine._boot_holds = set()
+        machine.is_init_done = asyncio.Event()
+        machine.register_boot_hold('init')
+        machine._load_hardware_platforms()
+
+        machine._load_core_modules()
+        # order is specified in mpfconfig.yaml
+
+        # machine._validate_config()
+        for section in ['machine', 'game', 'mpf', 'settings']:
+            machine.validate_machine_config_section('section')
+        machine.settings_controller = SettingsController(machine)
+        mpf_config._machine_config['settings'] = machine.settings_controller._settings
+        # settings_config = machine.config.get('settings', {})
+        # for name, settings in settings_config.items():
+        #     settings = self.machine.config_validator.validate_config("settings", settings)
+        print("Updated settings are: %s" % mpf_config._machine_config['settings'])
+        print(mpf_config)
 
         pickle.dump(mpf_config, open(ProductionConfigLoader.get_mpf_bundle_path(self.machine_path), "wb"))
         if self.args.mc:

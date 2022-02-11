@@ -119,6 +119,8 @@ class BaseTemplate(metaclass=abc.ABCMeta):
         """Return string representation."""
         return "<Template {}>".format(self.text)
 
+    def __reduce__(self):
+        return (dict, (1, 2))
 
 class BoolTemplate(BaseTemplate):
 
@@ -210,6 +212,9 @@ class NativeTypeTemplate:
     def __repr__(self):
         """Return String."""
         return "<NativeTemplate {}>".format(self.value)
+
+    def __reduce__(self):
+        return (NativeTypeTemplate, (self.value, None))
 
 
 class MpfFormatter(string.Formatter):

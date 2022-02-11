@@ -154,6 +154,10 @@ class ConfigValidator:
             add_missing_keys: If we should add missing keys while validating
             prefix: Prefix for debugging and error messages
         """
+        if self.machine.options['production']:
+            self.machine.log.info("Production, SKIP validation for %s and return source: %s" , config_spec, source)
+            return source
+        self.machine.log.info(f"Validating config for {config_spec}")
         if source is None:
             source = dict()
 

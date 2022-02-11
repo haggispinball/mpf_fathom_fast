@@ -24,14 +24,21 @@ class SettingsController(MpfController):
         # start with default settings
         self._settings = {}     # type: Dict[str, SettingEntry]
         """Dictionary of available settings."""
-        self._add_entries_from_config()
+
+        if self.machine.options['production']:
+            self._settings = self.machine.config.get('settings')
+            print("PRE_BAKED config: %s" % self._settings)
+        else:
+            self._add_entries_from_config()
 
     def _add_entries_from_config(self):
         # add entries from config
         self.config = self.machine.config.get('settings', {})
+        print("Settings config: %s" % self.config)
         for name, settings in self.config.items():
             settings = self.machine.config_validator.validate_config("settings", settings)
-            if not settings['machine_var']:
+            print("Settings are: %s" % settings)
+            if not settings.get('machine_var'):
                 settings['machine_var'] = name
             values = {}
             # convert types
